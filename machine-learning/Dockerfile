@@ -76,6 +76,10 @@ RUN --mount=type=cache,target=/root/.cache/pip/,id=pip-cache \
     set -eux \
     && echo "Installing Python requirements" \
       && python3 -m pip install --default-timeout=1000 --requirement requirements.txt \
+    && echo "Installing NLTK data" \
+      && python3 -W ignore::RuntimeWarning -m nltk.downloader -d "/usr/share/nltk_data" snowball_data \
+      && python3 -W ignore::RuntimeWarning -m nltk.downloader -d "/usr/share/nltk_data" stopwords \
+      && python3 -W ignore::RuntimeWarning -m nltk.downloader -d "/usr/share/nltk_data" punkt \
     && echo "Cleaning ml user" \
       && addgroup --gid 1000 paperless-ml \
       && adduser --home /app/ --disabled-password --uid 1000 --shell /sbin/nologin --ingroup paperless-ml paperless-ml  \
