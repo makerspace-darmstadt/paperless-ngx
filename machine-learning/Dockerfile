@@ -1,5 +1,13 @@
 
-FROM python:3.11-slim as base
+# syntax=docker/dockerfile:1
+FROM python:3.11-alpine as base
+
+ENV \
+    LANG="C.UTF-8" \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_FIND_LINKS="https://wheels.home-assistant.io/musllinux/ https://wheel-index.linuxserver.io/alpine/" \
+    PIP_PREFER_BINARY=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 FROM base as requirements
 
@@ -28,12 +36,12 @@ ARG S6_OVERLAY_VERSION=3.1.5.0
 
 WORKDIR /s6
 
+# hadolint ignore=DL3018
 RUN set -eux \
     && echo "Installing s6 build time packages" \
-      && apt-get update \
-      && apt-get install --yes --quiet --no-install-recommends \
+      && apk add --no-cache \
         curl \
-        xz-utils \
+        outils-sha256 \
     && echo "Installing s6-overlay" \
       && curl --fail --silent --show-error --location --output s6-overlay-noarch.tar.xz  "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" \
       && curl --fail --silent --show-error --location --output s6-overlay-noarch.tar.xz.sha256 "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz.sha256" \
@@ -49,16 +57,9 @@ RUN set -eux \
         && rm ./*.tar.xz \
         && rm ./*.sha256 \
     && echo "Cleaning up image" \
-      && apt-get -y purge \
+      apk del --no-cache --purge \
         curl \
-        xz-utils \
-      && apt-get -y autoremove --purge \
-      && apt-get clean --yes \
-      && rm -rf /var/lib/apt/lists/* \
-      && rm -rf /tmp/* \
-      && rm -rf /var/tmp/* \
-      && rm -rf /var/cache/apt/archives/* \
-      && truncate -s 0 /var/log/*log
+        outils-sha256
 
 #COPY ./rootfs /
 
@@ -76,9 +77,9 @@ RUN --mount=type=cache,target=/root/.cache/pip/,id=pip-cache \
     && echo "Installing Python requirements" \
       && python3 -m pip install --default-timeout=1000 --requirement requirements.txt \
     && echo "Cleaning ml user" \
-      && addgroup --gid 1000 machine-learner \
-      && useradd --uid 1000 --gid machine-learner --home-dir /app machine-learner \
-      && chown -R machine-learner:machine-learner /app
+      && addgroup --gid 1000 paperless-ml \
+      && adduser --home /app/ --disabled-password --uid 1000 --shell /sbin/nologin --ingroup paperless-ml paperless-ml  \
+      && chown -R paperless-ml:paperless-ml  /app
 
 COPY ./rootfs /
 

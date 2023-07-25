@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bcc7eb9df94e394e82a16c795aa01ad2de04aa7364c6dbcbbcea92092828e2db"
+            "sha256": "9680a92d8f1c4db893643b4a72691a8105c36521a1db1b79bfa5a46f480de6c7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -12,6 +12,11 @@
             {
                 "name": "pypi",
                 "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            },
+            {
+                "name": "alpine-wheels",
+                "url": "https://alpine-wheels.github.io/index",
                 "verify_ssl": true
             }
         ]

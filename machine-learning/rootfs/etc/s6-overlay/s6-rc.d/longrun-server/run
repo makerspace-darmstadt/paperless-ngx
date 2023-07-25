@@ -1,9 +1,9 @@
-#!/command/with-contenv bash
+#!/command/with-contenv ash
 # shellcheck shell=bash
 
 cd /app/
 
-exec s6-setuidgid machine-learner \
+exec s6-setuidgid paperless-ml  \
     /usr/local/bin/granian \
         --host 0.0.0.0 \
         --port 8000 \
