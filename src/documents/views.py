@@ -61,7 +61,6 @@ from documents.permissions import get_objects_for_user_owner_aware
 from documents.permissions import has_perms_owner_aware
 from documents.tasks import consume_file
 from paperless import version
-from paperless.db import GnuPG
 from paperless.views import StandardPagination
 
 from .bulk_download import ArchiveOnlyStrategy
@@ -323,9 +322,6 @@ class DocumentViewSet(
             if mime_type in {"application/csv", "text/csv"} and disposition == "inline":
                 mime_type = "text/plain"
 
-        if doc.storage_type == Document.STORAGE_TYPE_GPG:
-            file_handle = GnuPG.decrypted(file_handle)
-
         response = HttpResponse(file_handle, content_type=mime_type)
         # Firefox is not able to handle unicode characters in filename field
         # RFC 5987 addresses this issue
@@ -466,10 +462,7 @@ class DocumentViewSet(
                 doc,
             ):
                 return HttpResponseForbidden("Insufficient permissions")
-            if doc.storage_type == Document.STORAGE_TYPE_GPG:
-                handle = GnuPG.decrypted(doc.thumbnail_file)
-            else:
-                handle = doc.thumbnail_file
+            handle = doc.thumbnail_file
             # TODO: Send ETag information and use that to send new thumbnails
             #  if available
 

@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 import tempfile
-import time
 from pathlib import Path
 from typing import List
 from typing import Set
@@ -39,7 +38,6 @@ from documents.settings import EXPORTER_FILE_NAME
 from documents.settings import EXPORTER_THUMBNAIL_NAME
 from documents.utils import copy_file_with_basic_stats
 from paperless import version
-from paperless.db import GnuPG
 from paperless_mail.models import MailAccount
 from paperless_mail.models import MailRule
 
@@ -288,9 +286,6 @@ class Command(BaseCommand):
             total=len(document_manifest),
             disable=progress_bar_disable,
         ):
-            # 3.1. store files unencrypted
-            document_dict["fields"]["storage_type"] = Document.STORAGE_TYPE_UNENCRYPTED
-
             document = document_map[document_dict["pk"]]
 
             # 3.2. generate a unique filename
@@ -300,7 +295,6 @@ class Command(BaseCommand):
                     base_name = generate_filename(
                         document,
                         counter=filename_counter,
-                        append_gpg=False,
                     )
                 else:
                     base_name = document.get_public_filename(counter=filename_counter)
@@ -337,41 +331,21 @@ class Command(BaseCommand):
                 archive_target = None
 
             # 3.4. write files to target folder
-            if document.storage_type == Document.STORAGE_TYPE_GPG:
-                t = int(time.mktime(document.created.timetuple()))
+            self.check_and_copy(
+                document.source_path,
+                document.checksum,
+                original_target,
+            )
 
-                original_target.parent.mkdir(parents=True, exist_ok=True)
-                with document.source_file as out_file:
-                    original_target.write_bytes(GnuPG.decrypted(out_file))
-                    os.utime(original_target, times=(t, t))
+            if thumbnail_target:
+                self.check_and_copy(document.thumbnail_path, None, thumbnail_target)
 
-                if thumbnail_target:
-                    thumbnail_target.parent.mkdir(parents=True, exist_ok=True)
-                    with document.thumbnail_file as out_file:
-                        thumbnail_target.write_bytes(GnuPG.decrypted(out_file))
-                        os.utime(thumbnail_target, times=(t, t))
-
-                if archive_target:
-                    archive_target.parent.mkdir(parents=True, exist_ok=True)
-                    with document.archive_path as out_file:
-                        archive_target.write_bytes(GnuPG.decrypted(out_file))
-                        os.utime(archive_target, times=(t, t))
-            else:
+            if archive_target:
                 self.check_and_copy(
-                    document.source_path,
-                    document.checksum,
-                    original_target,
+                    document.archive_path,
+                    document.archive_checksum,
+                    archive_target,
                 )
-
-                if thumbnail_target:
-                    self.check_and_copy(document.thumbnail_path, None, thumbnail_target)
-
-                if archive_target:
-                    self.check_and_copy(
-                        document.archive_path,
-                        document.archive_checksum,
-                        archive_target,
-                    )
 
             if self.split_manifest:
                 manifest_name = base_name + "-manifest.json"

@@ -6,8 +6,6 @@ from django.conf import settings
 from django.db import migrations
 from django.db import models
 
-from paperless.db import GnuPG
-
 STORAGE_TYPE_UNENCRYPTED = "unencrypted"
 STORAGE_TYPE_GPG = "gpg"
 
@@ -29,10 +27,7 @@ def add_mime_types(apps, schema_editor):
 
     for d in documents:
         f = open(source_path(d), "rb")
-        if d.storage_type == STORAGE_TYPE_GPG:
-            data = GnuPG.decrypted(f)
-        else:
-            data = f.read(1024)
+        data = f.read(1024)
 
         d.mime_type = magic.from_buffer(data, mime=True)
         d.save()

@@ -4,33 +4,11 @@ import hashlib
 import os
 
 import django.utils.timezone
-import gnupg
 from django.conf import settings
 from django.db import migrations
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.termcolors import colorize as colourise  # Spelling hurts me
-
-
-class GnuPG:
-    """
-    A handy singleton to use when handling encrypted files.
-    """
-
-    gpg = gnupg.GPG(gnupghome=settings.GNUPG_HOME)
-
-    @classmethod
-    def decrypted(cls, file_handle):
-        return cls.gpg.decrypt_file(file_handle, passphrase=settings.PASSPHRASE).data
-
-    @classmethod
-    def encrypted(cls, file_handle):
-        return cls.gpg.encrypt_file(
-            file_handle,
-            recipients=None,
-            passphrase=settings.PASSPHRASE,
-            symmetric=True,
-        ).data
 
 
 class Document:
@@ -104,8 +82,8 @@ def set_checksums(apps, schema_editor):
             ),
         )
 
-        with document.source_file as encrypted:
-            checksum = hashlib.md5(GnuPG.decrypted(encrypted)).hexdigest()
+        with document.source_file as document_file_handle:
+            checksum = hashlib.md5(document_file_handle.read()).hexdigest()
 
         if checksum in sums:
             error = "\n{line}{p1}\n\n{doc1}\n{doc2}\n\n{p2}\n\n{code}\n\n{p3}{line}".format(

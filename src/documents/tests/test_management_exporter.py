@@ -37,6 +37,7 @@ from documents.tests.utils import paperless_environment
 
 class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.target = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.target)
 
@@ -69,11 +70,10 @@ class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         )
         self.d4 = Document.objects.create(
             content="Content",
-            checksum="82186aaa94f0b98697d704b90fd1c072",
+            checksum="699307689affff312e6dbc2c5a52dc58",
             title="wow_dec",
-            filename="0000004.pdf.gpg",
+            filename="0000004.pdf",
             mime_type="application/pdf",
-            storage_type=Document.STORAGE_TYPE_GPG,
         )
 
         self.note = Note.objects.create(
@@ -96,7 +96,6 @@ class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         self.d1.save()
         self.d4.storage_path = self.sp1
         self.d4.save()
-        super().setUp()
 
     def _get_document_from_manifest(self, manifest, id):
         f = list(
@@ -110,7 +109,6 @@ class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         else:
             raise ValueError(f"document with id {id} does not exist in manifest")
 
-    @override_settings(PASSPHRASE="test")
     def _do_export(
         self,
         use_filename_format=False,
@@ -202,11 +200,6 @@ class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
                 with open(fname, "rb") as f:
                     checksum = hashlib.md5(f.read()).hexdigest()
                 self.assertEqual(checksum, element["fields"]["checksum"])
-
-                self.assertEqual(
-                    element["fields"]["storage_type"],
-                    Document.STORAGE_TYPE_UNENCRYPTED,
-                )
 
                 if document_exporter.EXPORTER_ARCHIVE_NAME in element:
                     fname = os.path.join(
@@ -394,12 +387,11 @@ class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         Document.objects.create(
             checksum="AAAAAAAAAAAAAAAAA",
             title="wow",
-            filename="0000004.pdf",
+            filename="0000008.pdf",
             mime_type="application/pdf",
         )
         self.assertRaises(FileNotFoundError, call_command, "document_exporter", target)
 
-    @override_settings(PASSPHRASE="test")
     def test_export_zipped(self):
         """
         GIVEN:
@@ -432,7 +424,6 @@ class TestExportImport(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
             self.assertIn("manifest.json", zip.namelist())
             self.assertIn("version.json", zip.namelist())
 
-    @override_settings(PASSPHRASE="test")
     def test_export_zipped_format(self):
         """
         GIVEN:

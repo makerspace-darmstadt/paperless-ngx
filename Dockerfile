@@ -64,7 +64,6 @@ ARG RUNTIME_PACKAGES="\
   fonts-liberation \
   gettext \
   ghostscript \
-  gnupg \
   icc-profiles-free \
   imagemagick \
   # Image processing

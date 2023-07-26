@@ -836,9 +836,6 @@ if os.environ.get("PAPERLESS_OCR_MAX_IMAGE_PIXELS") is not None:
 
 OCR_USER_ARGS = os.getenv("PAPERLESS_OCR_USER_ARGS", "{}")
 
-# GNUPG needs a home directory for some reason
-GNUPG_HOME = os.getenv("HOME", "/tmp")
-
 # Convert is part of the ImageMagick package
 CONVERT_BINARY = os.getenv("PAPERLESS_CONVERT_BINARY", "convert")
 CONVERT_TMPDIR = os.getenv("PAPERLESS_CONVERT_TMPDIR")
@@ -846,19 +843,6 @@ CONVERT_MEMORY_LIMIT = os.getenv("PAPERLESS_CONVERT_MEMORY_LIMIT")
 
 GS_BINARY = os.getenv("PAPERLESS_GS_BINARY", "gs")
 
-
-# Pre-2.x versions of Paperless stored your documents locally with GPG
-# encryption, but that is no longer the default.  This behaviour is still
-# available, but it must be explicitly enabled by setting
-# `PAPERLESS_PASSPHRASE` in your environment or config file.  The default is to
-# store these files unencrypted.
-#
-# Translation:
-# * If you're a new user, you can safely ignore this setting.
-# * If you're upgrading from 1.x, this must be set, OR you can run
-#   `./manage.py change_storage_type gpg unencrypted` to decrypt your files,
-#   after which you can unset this value.
-PASSPHRASE = os.getenv("PAPERLESS_PASSPHRASE")
 
 # Trigger a script after every successful document consumption?
 PRE_CONSUME_SCRIPT = os.getenv("PAPERLESS_PRE_CONSUME_SCRIPT")

@@ -1,8 +1,6 @@
 import filecmp
-import hashlib
 import os
 import shutil
-import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -101,72 +99,6 @@ class TestArchiver(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
 
         self.assertEqual(doc1.archive_filename, "document.pdf")
         self.assertEqual(doc2.archive_filename, "document_01.pdf")
-
-
-class TestDecryptDocuments(FileSystemAssertsMixin, TestCase):
-    @override_settings(
-        ORIGINALS_DIR=os.path.join(os.path.dirname(__file__), "samples", "originals"),
-        THUMBNAIL_DIR=os.path.join(os.path.dirname(__file__), "samples", "thumb"),
-        PASSPHRASE="test",
-        FILENAME_FORMAT=None,
-    )
-    @mock.patch("documents.management.commands.decrypt_documents.input")
-    def test_decrypt(self, m):
-        media_dir = tempfile.mkdtemp()
-        originals_dir = os.path.join(media_dir, "documents", "originals")
-        thumb_dir = os.path.join(media_dir, "documents", "thumbnails")
-        os.makedirs(originals_dir, exist_ok=True)
-        os.makedirs(thumb_dir, exist_ok=True)
-
-        override_settings(
-            ORIGINALS_DIR=originals_dir,
-            THUMBNAIL_DIR=thumb_dir,
-            PASSPHRASE="test",
-        ).enable()
-
-        doc = Document.objects.create(
-            checksum="82186aaa94f0b98697d704b90fd1c072",
-            title="wow",
-            filename="0000004.pdf.gpg",
-            mime_type="application/pdf",
-            storage_type=Document.STORAGE_TYPE_GPG,
-        )
-
-        shutil.copy(
-            os.path.join(
-                os.path.dirname(__file__),
-                "samples",
-                "documents",
-                "originals",
-                "0000004.pdf.gpg",
-            ),
-            os.path.join(originals_dir, "0000004.pdf.gpg"),
-        )
-        shutil.copy(
-            os.path.join(
-                os.path.dirname(__file__),
-                "samples",
-                "documents",
-                "thumbnails",
-                "0000004.webp.gpg",
-            ),
-            os.path.join(thumb_dir, f"{doc.id:07}.webp.gpg"),
-        )
-
-        call_command("decrypt_documents")
-
-        doc.refresh_from_db()
-
-        self.assertEqual(doc.storage_type, Document.STORAGE_TYPE_UNENCRYPTED)
-        self.assertEqual(doc.filename, "0000004.pdf")
-        self.assertIsFile(os.path.join(originals_dir, "0000004.pdf"))
-        self.assertIsFile(doc.source_path)
-        self.assertIsFile(os.path.join(thumb_dir, f"{doc.id:07}.webp"))
-        self.assertIsFile(doc.thumbnail_path)
-
-        with doc.source_file as f:
-            checksum = hashlib.md5(f.read()).hexdigest()
-            self.assertEqual(checksum, doc.checksum)
 
 
 class TestMakeIndex(TestCase):

@@ -262,7 +262,6 @@ supported.
     - `fonts-liberation` for generating thumbnails for plain text
       files
     - `imagemagick` >= 6 for PDF conversion
-    - `gnupg` for handling encrypted documents
     - `libpq-dev` for PostgreSQL
     - `libmagic-dev` for mime type detection
     - `mariadb-client` for MariaDB compile time
@@ -273,7 +272,7 @@ supported.
     Use this list for your preferred package management:
 
     ```
-    python3 python3-pip python3-dev imagemagick fonts-liberation gnupg libpq-dev default-libmysqlclient-dev libmagic-dev mime-support libzbar0 poppler-utils
+    python3 python3-pip python3-dev imagemagick fonts-liberation libpq-dev default-libmysqlclient-dev libmagic-dev mime-support libzbar0 poppler-utils
     ```
 
     These dependencies are required for OCRmyPDF, which is used for text
@@ -560,6 +559,11 @@ Git clone to point to `https://github.com/paperless-ngx/paperless-ngx`,
 e.g. using the command
 `git remote set-url origin https://github.com/paperless-ngx/paperless-ngx`
 and then pull the latest version.
+
+!!! warning
+
+    If using document encryption, first update to vXX.YY.ZZ, decrypt
+    all documents, then upgrade to the latest
 
 ## Migrating from Paperless
 

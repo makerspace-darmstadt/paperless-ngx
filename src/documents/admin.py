@@ -36,7 +36,6 @@ class DocumentAdmin(GuardedModelAdmin):
         "added",
         "modified",
         "mime_type",
-        "storage_type",
         "filename",
         "checksum",
         "archive_filename",

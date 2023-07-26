@@ -6,7 +6,6 @@ import tempfile
 import time
 from pathlib import Path
 
-import gnupg
 from django.conf import settings
 from django.db import migrations
 
@@ -22,8 +21,10 @@ def _do_convert(work_package):
         passphrase,
     ) = work_package
 
+    import gnupg
+
     try:
-        gpg = gnupg.GPG(gnupghome=settings.GNUPG_HOME)
+        gpg = gnupg.GPG(gnupghome="/tmp")
 
         logger.info(f"Decrypting thumbnail: {existing_encrypted_thumbnail}")
 

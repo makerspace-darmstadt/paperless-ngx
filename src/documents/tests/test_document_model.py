@@ -1,5 +1,3 @@
-import shutil
-import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -14,22 +12,10 @@ from django.utils import timezone
 
 from documents.models import Correspondent
 from documents.models import Document
+from documents.tests.utils import DirectoriesMixin
 
 
-class TestDocument(TestCase):
-    def setUp(self) -> None:
-        self.originals_dir = tempfile.mkdtemp()
-        self.thumb_dir = tempfile.mkdtemp()
-
-        override_settings(
-            ORIGINALS_DIR=self.originals_dir,
-            THUMBNAIL_DIR=self.thumb_dir,
-        ).enable()
-
-    def tearDown(self) -> None:
-        shutil.rmtree(self.originals_dir)
-        shutil.rmtree(self.thumb_dir)
-
+class TestDocument(DirectoriesMixin, TestCase):
     def test_file_deletion(self):
         document = Document.objects.create(
             correspondent=Correspondent.objects.create(name="Test0"),
