@@ -187,6 +187,8 @@ class CorrespondentViewSet(ModelViewSet, PassUserMixin):
         "match",
         "document_count",
         "last_correspondence",
+        "backend_id",
+        "member_id",
     )
 
 

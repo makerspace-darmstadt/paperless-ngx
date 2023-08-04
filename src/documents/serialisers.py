@@ -259,6 +259,8 @@ class CorrespondentSerializer(MatchingModelSerializer, OwnedObjectSerializer):
             "permissions",
             "user_can_change",
             "set_permissions",
+            "backend_id",
+            "member_id",
         )
 
 

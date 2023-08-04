@@ -88,6 +88,26 @@ class MatchingModel(ModelWithOwner):
 
 
 class Correspondent(MatchingModel):
+    member_id = models.IntegerField(
+        _("Member number of this correspondent"),
+        default=None,
+        help_text=_(
+            "Member ID of this correspondent. Only used if this is a member",
+        ),
+        blank=True,
+        null=True,
+        unique=True,
+    )
+
+    backend_id = models.IntegerField(
+        _("Backend id of this correspondent"),
+        help_text=_(
+            "Backend ID of this correspondent",
+        ),
+        default=0,
+        unique=True,
+    )
+
     class Meta(MatchingModel.Meta):
         verbose_name = _("correspondent")
         verbose_name_plural = _("correspondents")

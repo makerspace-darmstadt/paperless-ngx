@@ -16,7 +16,9 @@
 <table class="table table-striped align-middle border shadow-sm">
   <thead>
     <tr>
+      <th scope="col" appSortable="backend_id" [currentSortField]="sortField" [currentSortReverse]="sortReverse" (sort)="onSort($event)" i18n>Backend ID</th>
       <th scope="col" appSortable="name" [currentSortField]="sortField" [currentSortReverse]="sortReverse" (sort)="onSort($event)" i18n>Name</th>
+      <th scope="col" appSortable="member_id" [currentSortField]="sortField" [currentSortReverse]="sortReverse" (sort)="onSort($event)" i18n>Mitglieds-Nr</th>
       <th scope="col" class="d-none d-sm-table-cell" appSortable="matching_algorithm" [currentSortField]="sortField" [currentSortReverse]="sortReverse" (sort)="onSort($event)" i18n>Matching</th>
       <th scope="col" appSortable="document_count" [currentSortField]="sortField" [currentSortReverse]="sortReverse" (sort)="onSort($event)" i18n>Document count</th>
       <th scope="col" *ngFor="let column of extraColumns" appSortable="{{column.key}}" [currentSortField]="sortField" [currentSortReverse]="sortReverse" (sort)="onSort($event)">{{column.name}}</th>
@@ -25,7 +27,9 @@
   </thead>
   <tbody>
     <tr *ngFor="let object of data">
+      <td scope="row">{{ object.backend_id }}</td>
       <td scope="row">{{ object.name }}</td>
+      <td scope="row">{{ object.member_id || "Gast" }}</td>
       <td scope="row" class="d-none d-sm-table-cell">{{ getMatching(object) }}</td>
       <td scope="row">{{ object.document_count }}</td>
       <td scope="row" *ngFor="let column of extraColumns">
